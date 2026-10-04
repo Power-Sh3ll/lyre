@@ -1,4 +1,4 @@
-import argparse, os, sys, shutil, subprocess
+import os, subprocess
 from pathlib import Path
 
 
@@ -101,7 +101,7 @@ def ingest_media(path: str | os.PathLike, overwrite: bool | None = None) -> Path
     return rip_and_convert(media_path, overwrite=overwrite)
 
 if __name__ == "__main__":
-    test_path = Path.cwd() / "Thants_Not_Jorge.aac"
+    test_path = Path.cwd() / "Thants_Not_Jorge.mp4"
     if ingest_media(test_path, overwrite=True) is None:
         print("Failed to ingest media.")
     else:

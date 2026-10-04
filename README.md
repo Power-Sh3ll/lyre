@@ -20,3 +20,15 @@ OUT:
 
 Check if the audio contains distinguishable voices or just background noise before proceeding to diarization.
 
+Proposed Output:
+```json
+{
+    segments: [
+        {
+            "start": 0.0,
+            "end": 5.0,
+            "type": "voice" // (Voice, Noise, None)
+        }
+    ]
+}
+```
