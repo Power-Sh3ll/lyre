@@ -58,7 +58,7 @@ def rip_and_convert(path: str | os.PathLike, overwrite: bool | None = None) -> P
     Returns:
         path.Path: The file path of the ripped audio file if successful, None otherwise.
     """
-    output_path = path.with_suffix(".mp3")
+    output_path = path.with_suffix(".wav")
 
     if output_path.exists():
         if overwrite is None:
@@ -71,7 +71,7 @@ def rip_and_convert(path: str | os.PathLike, overwrite: bool | None = None) -> P
         "-y",
         "-i", str(path),
         "-vn",
-        "-acodec", "libmp3lame",
+        "-acodec", "pcm_s16le",
         str(output_path),
     ]
     subprocess.run(command, check=True)
