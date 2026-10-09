@@ -47,7 +47,9 @@ def confirm_overwrite(path: str | os.PathLike) -> bool:
 
 def rip_and_convert(path: str | os.PathLike, overwrite: bool | None = None) -> Path:
     """
-    use ffmpeg to extract the media from the given file path.
+    Use ffmpeg to extract the audio from the given file path and convert it to
+    16 kHz mono 16-bit PCM WAV. A .wav input is left untouched and the result is
+    written to "<name>_ingested.wav".
 
     Args:
         path (str | os.PathLike): The file path of the media to rip.
@@ -59,6 +61,9 @@ def rip_and_convert(path: str | os.PathLike, overwrite: bool | None = None) -> P
         path.Path: The file path of the ripped audio file if successful, None otherwise.
     """
     output_path = path.with_suffix(".wav")
+    if output_path == path:
+        # ffmpeg cannot write over its own input, so never touch the original WAV
+        output_path = path.with_name(f"{path.stem}_ingested.wav")
 
     if output_path.exists():
         if overwrite is None:
@@ -72,14 +77,23 @@ def rip_and_convert(path: str | os.PathLike, overwrite: bool | None = None) -> P
         "-i", str(path),
         "-vn",
         "-acodec", "pcm_s16le",
+        "-ar", "16000",
+        "-ac", "1",
         str(output_path),
     ]
-    subprocess.run(command, check=True)
+    try:
+        subprocess.run(command, check=True)
+    except FileNotFoundError:
+        print("ffmpeg was not found. Install it and make sure it is on your PATH.")
+        return None
+    except subprocess.CalledProcessError as e:
+        print(f"ffmpeg failed to convert '{path}' (exit code {e.returncode}).")
+        return None
     return output_path
 
 def ingest_media(path: str | os.PathLike, overwrite: bool | None = None) -> Path:
     """
-    Sanitize the file path and check if the media has a valid format. Remove audio from video, Convert audio to mp3 if necessary.
+    Sanitize the file path and check if the media has a valid format. Strip audio from video and convert everything to 16 kHz mono WAV.
 
     Args:
         path (str | os.PathLike): The file path of the media to ingest.
